@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "contabilidad elden lord",
+    "slug": "contabilidad-elden-lord",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/image.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/image.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/image.png",
+        "backgroundColor": "#0000"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.juanda_dev.contabilidadeldenlord"
+    },
+    "web": {
+      "favicon": "./assets/image.png"
+    },
+    "plugins": [
+      "expo-sqlite"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "ee63f541-911e-4fb2-9a2a-c0b0653f0078"
+      }
+    },
+    "owner": "juanda_dev"
+  }
+}

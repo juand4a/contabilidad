@@ -1,0 +1,16 @@
+# Nunca versionar AppData (Windows)
+AppData/
+**/AppData/
+
+# caches del sistema y navegadores
+**/Cache/
+**/Cache_Data/
+**/IndexedDB/
+
+# Expo / React Native
+.expo/
+dist/
+build/
+node_modules/
+*.log
+.DS_Store
