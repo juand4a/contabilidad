@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, TextInput, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";  // Importamos Picker
 
 import Row from "../components/Row";
 import Card from "../components/Card";
@@ -69,7 +70,7 @@ export default function LoansScreen({ navigation }) {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#070708" }}>
-      <View style={{ padding: 16, paddingTop: 18 }}>
+      <View style={{ padding: 16, paddingTop: 18, marginTop: 30 }}>
         <Text style={{ color: "#a59a7a", letterSpacing: 2, fontWeight: "700" }}>BOOK OF DEBTS</Text>
         <Text style={{ color: "#f2e3b6", fontSize: 22, fontWeight: "900", marginTop: 10 }}>
           Deudas y Préstamos
@@ -95,20 +96,37 @@ export default function LoansScreen({ navigation }) {
             right={<Ionicons name="sparkles" size={18} color="#caa85a" />}
           >
             <View style={{ gap: 10 }}>
+              {/* Dirección */}
               <View>
                 <Text style={labelStyle}>Dirección</Text>
                 <Text style={{ color: "#8f866c", marginTop: -2 }}>
-                  i_owe (debo) / owed_to_me (me deben)
+                  debo / me deben
                 </Text>
-                <TextInput
-                  value={direction}
-                  onChangeText={setDirection}
-                  placeholder="i_owe"
-                  placeholderTextColor="#6f6754"
-                  style={inputStyle}
-                />
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#3b2f16",
+                    backgroundColor: "#0b0b0c",
+                    borderRadius: 8,
+                    marginBottom: 18,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Picker
+                    selectedValue={direction}
+                    onValueChange={(itemValue) => setDirection(itemValue)}
+                    style={{
+                      height: 50,
+                      color: "#f2e3b6",
+                    }}
+                  >
+                    <Picker.Item label="Debo" value="i_owe" />
+                    <Picker.Item label="Me deben" value="owed_to_me" />
+                  </Picker>
+                </View>
               </View>
 
+              {/* Persona */}
               <View>
                 <Text style={labelStyle}>Persona</Text>
                 <TextInput
@@ -120,6 +138,7 @@ export default function LoansScreen({ navigation }) {
                 />
               </View>
 
+              {/* Principal */}
               <View>
                 <Text style={labelStyle}>Principal (COP)</Text>
                 <TextInput
@@ -132,21 +151,38 @@ export default function LoansScreen({ navigation }) {
                 />
               </View>
 
+              {/* Cuenta */}
               <View>
                 <Text style={labelStyle}>Cuenta (ID) desde la que sale/entra</Text>
-                <TextInput
-                  value={accountId}
-                  onChangeText={setAccountId}
-                  keyboardType="numeric"
-                  placeholder="1"
-                  placeholderTextColor="#6f6754"
-                  style={inputStyle}
-                />
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#3b2f16",
+                    backgroundColor: "#0b0b0c",
+                    borderRadius: 8,
+                    marginBottom: 18,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Picker
+                    selectedValue={accountId}
+                    onValueChange={(itemValue) => setAccountId(itemValue)}
+                    style={{
+                      height: 50,
+                      color: "#f2e3b6",
+                    }}
+                  >
+                    {accounts.map((account) => (
+                      <Picker.Item key={account.id} label={account.name} value={String(account.id)} />
+                    ))}
+                  </Picker>
+                </View>
                 <Text style={hintStyle}>
                   Cuentas: {accounts.map((a) => `${a.id}:${a.name}`).join(" · ")}
                 </Text>
               </View>
 
+              {/* Crear préstamo */}
               <ERButton
                 title="Crear"
                 onPress={async () => {
@@ -160,20 +196,24 @@ export default function LoansScreen({ navigation }) {
                     return Alert.alert("Dirección inválida", "Usa: i_owe o owed_to_me");
                   }
 
-                  await createLoan({
-                    direction: dir,
-                    person: person.trim(),
-                    principal: p,
-                    interest_rate: 0,
-                    start_date: todayISO(),
-                    note: null,
-                    accountId: Number(accountId),
-                  });
-
-                  setShowNew(false);
-                  setPerson("");
-                  setPrincipal("");
-                  await load();
+                  try {
+                    await createLoan({
+                      direction: dir,
+                      person: person.trim(),
+                      principal: p,
+                      interest_rate: 0,
+                      start_date: todayISO(),
+                      note: null,
+                      accountId: Number(accountId),
+                    });
+                    Alert.alert("Éxito", "Préstamo creado correctamente.");
+                    setShowNew(false);
+                    setPerson("");
+                    setPrincipal("");
+                    await load();
+                  } catch (error) {
+                    Alert.alert("Error", "No se pudo crear el préstamo.");
+                  }
                 }}
               />
             </View>

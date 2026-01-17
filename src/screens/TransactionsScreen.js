@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import Row from "../components/Row";
@@ -70,7 +70,7 @@ export default function TransactionsScreen({ navigation }) {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#070708" }}>
       {/* HEADER */}
-      <View style={{ padding: 16, paddingTop: 18 }}>
+      <View style={{ padding: 16, paddingTop: 18,marginTop:30 }}>
         <Text style={{ color: "#a59a7a", letterSpacing: 2, fontWeight: "700" }}>CHRONICLE OF RUNES</Text>
         <Text style={{ color: "#f2e3b6", fontSize: 22, fontWeight: "900", marginTop: 10 }}>
           Movimientos
@@ -100,8 +100,9 @@ export default function TransactionsScreen({ navigation }) {
                 <Row
                   key={t.id}
                   title={`${typeLabel(t.type)} · ${formatCOP(t.amount)}`}
-                  subtitle={`${t.date} · ${t.account_name}${t.category_name ? " · " + t.category_name : ""}${t.note ? " · " + t.note : ""}`}
+                  subtitle={`${t.date} · ${t.account_name}${t.category_name ? " · " + t.category_name : " · Sin categoría"}${t.note ? " · " + t.note : " · Sin nota"}`}
                   iconLeft={<Ionicons name={txIcon(t.type, t.amount)} size={16} color="#caa85a" />}
+                  onPress={() => navigation.navigate("TransactionDetail", { transactionId: t.id })}
                 />
               ))}
             </View>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, TextInput, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";  // Importamos el Picker
 
 import Row from "../components/Row";
 import Card from "../components/Card";
@@ -104,6 +105,7 @@ export default function RecurringScreen({ navigation }) {
           right={<Ionicons name="repeat" size={18} color="#caa85a" />}
         >
           <View style={{ gap: 10 }}>
+            {/* Nombre */}
             <View>
               <Text style={labelStyle}>Nombre</Text>
               <TextInput
@@ -115,18 +117,35 @@ export default function RecurringScreen({ navigation }) {
               />
             </View>
 
+            {/* Tipo de transacción (expense / income) */}
             <View>
               <Text style={labelStyle}>Tipo</Text>
               <Text style={{ color: "#8f866c", marginTop: -2 }}>expense / income</Text>
-              <TextInput
-                value={type}
-                onChangeText={setType}
-                placeholder="expense"
-                placeholderTextColor="#6f6754"
-                style={inputStyle}
-              />
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#3b2f16",
+                  backgroundColor: "#0b0b0c",
+                  borderRadius: 8,
+                  marginBottom: 18,
+                  overflow: "hidden",
+                }}
+              >
+                <Picker
+                  selectedValue={type}
+                  onValueChange={(itemValue) => setType(itemValue)}
+                  style={{
+                    height: 50,
+                    color: "#f2e3b6",
+                  }}
+                >
+                  <Picker.Item label="Gasto" value="expense" />
+                  <Picker.Item label="Ingreso" value="income" />
+                </Picker>
+              </View>
             </View>
 
+            {/* Monto */}
             <View>
               <Text style={labelStyle}>Monto (COP)</Text>
               <TextInput
@@ -139,36 +158,68 @@ export default function RecurringScreen({ navigation }) {
               />
             </View>
 
+            {/* Cuenta */}
             <View>
-              <Text style={labelStyle}>Cuenta (ID)</Text>
-              <TextInput
-                value={accountId}
-                onChangeText={setAccountId}
-                placeholder="1"
-                placeholderTextColor="#6f6754"
-                keyboardType="numeric"
-                style={inputStyle}
-              />
+              <Text style={labelStyle}>Cuenta</Text>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#3b2f16",
+                  backgroundColor: "#0b0b0c",
+                  borderRadius: 8,
+                  marginBottom: 18,
+                  overflow: "hidden",
+                }}
+              >
+                <Picker
+                  selectedValue={accountId}
+                  onValueChange={(itemValue) => setAccountId(itemValue)}
+                  style={{
+                    height: 50,
+                    color: "#f2e3b6",
+                  }}
+                >
+                  {accounts.map((account) => (
+                    <Picker.Item key={account.id} label={account.name} value={String(account.id)} />
+                  ))}
+                </Picker>
+              </View>
               <Text style={hintStyle}>
                 Cuentas: {accounts.map((a) => `${a.id}:${a.name}`).join(" · ")}
               </Text>
             </View>
 
+            {/* Categoría */}
             <View>
-              <Text style={labelStyle}>Categoría (ID)</Text>
-              <TextInput
-                value={categoryId}
-                onChangeText={setCategoryId}
-                placeholder="(opcional)"
-                placeholderTextColor="#6f6754"
-                keyboardType="numeric"
-                style={inputStyle}
-              />
-              <Text style={hintStyle}>
-                Categorías: {cats.map((c) => `${c.id}:${c.name}`).join(" · ")}
-              </Text>
+              <Text style={labelStyle}>Categoría (opcional)</Text>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#3b2f16",
+                  backgroundColor: "#0b0b0c",
+                  borderRadius: 8,
+                  marginBottom: 18,
+                  overflow: "hidden",
+                }}
+              >
+                <Picker
+                  selectedValue={categoryId}
+                  onValueChange={(itemValue) => setCategoryId(itemValue)}
+                  style={{
+                    height: 50,
+                    color: "#f2e3b6",
+                  }}
+                >
+                  <Picker.Item label="Sin categoría" value="" />
+                  {cats.map((cat) => (
+                    <Picker.Item key={cat.id} label={cat.name} value={String(cat.id)} />
+                  ))}
+                </Picker>
+              </View>
+           
             </View>
 
+            {/* Día del mes */}
             <View>
               <Text style={labelStyle}>Día del mes</Text>
               <Text style={{ color: "#8f866c", marginTop: -2 }}>1-28/30/31 (según mes)</Text>
@@ -182,6 +233,7 @@ export default function RecurringScreen({ navigation }) {
               />
             </View>
 
+            {/* Botón para crear */}
             <ERButton
               title="Crear"
               onPress={async () => {

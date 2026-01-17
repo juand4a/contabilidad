@@ -25,6 +25,7 @@ function Pill({ icon, label, value }) {
         borderRadius: 14,
         backgroundColor: "#0b0b0c",
         padding: 12,
+        marginTop:30
       }}
     >
       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>

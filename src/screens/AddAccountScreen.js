@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker";  // Importamos el Picker
 
 import Card from "../components/Card";
 import ERButton from "../components/ERButton";
@@ -11,7 +12,7 @@ import { parseCOP } from "../utils/money";
 
 export default function AddAccountScreen({ navigation }) {
   const [name, setName] = useState("");
-  const [type, setType] = useState("bank");
+  const [type, setType] = useState("bank"); // default tipo "banco"
   const [initial, setInitial] = useState("0");
   const [date, setDate] = useState(todayISO());
 
@@ -28,7 +29,7 @@ export default function AddAccountScreen({ navigation }) {
 
   return (
     <View style={{ flex: 1, backgroundColor: "#070708", padding: 16 }}>
-      <Text style={{ color: "#a59a7a", letterSpacing: 2, fontWeight: "700" }}>FORGE A NEW ACCOUNT</Text>
+      <Text style={{ color: "#a59a7a", letterSpacing: 2, fontWeight: "700" }}>CREAR NUEVA CUENTA</Text>
 
       <Card
         title="Detalles"
@@ -45,17 +46,34 @@ export default function AddAccountScreen({ navigation }) {
             style={inputStyle}
           />
 
-          <Text style={labelStyle}>Tipo</Text>
+          <Text style={labelStyle}>Tipo de cuenta</Text>
           <Text style={{ color: "#8f866c", marginTop: -6 }}>
-            bank / cash / wallet / investment
+            Selecciona el tipo de cuenta (banco, efectivo, billetera, inversión)
           </Text>
-          <TextInput
-            value={type}
-            onChangeText={setType}
-            placeholder="bank"
-            placeholderTextColor="#6f6754"
-            style={inputStyle}
-          />
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: "#3b2f16",
+              backgroundColor: "#0b0b0c",
+              borderRadius: 8,
+              marginBottom: 18,
+              overflow: "hidden",  // Asegura que el Picker no sobresalga de los bordes redondeados
+            }}
+          >
+            <Picker
+              selectedValue={type}
+              onValueChange={(itemValue) => setType(itemValue)}
+              style={{
+                height: 50,
+                color: "#f2e3b6",
+              }}
+            >
+              <Picker.Item label="Banco" value="bank" />
+              <Picker.Item label="Efectivo" value="cash" />
+              <Picker.Item label="Billetera" value="wallet" />
+              <Picker.Item label="Inversión" value="investment" />
+            </Picker>
+          </View>
 
           <Text style={labelStyle}>Saldo inicial (COP)</Text>
           <TextInput

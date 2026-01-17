@@ -44,7 +44,7 @@ export default function ReportsScreen() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#070708" }}>
-      <View style={{ padding: 16, paddingTop: 18 }}>
+      <View style={{ padding: 16, paddingTop: 18,marginTop:30 }}>
         <Text style={{ color: "#a59a7a", letterSpacing: 2, fontWeight: "700" }}>SCROLL OF INSIGHT</Text>
         <Text style={{ color: "#f2e3b6", fontSize: 22, fontWeight: "900", marginTop: 10 }}>
           Reporte

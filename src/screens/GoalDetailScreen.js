@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, TextInput, Button, Alert } from "react-native";
+import { View, Text, ScrollView, TextInput, Alert } from "react-native";
 import Row from "../components/Row";
+import ERButton from "../components/ERButton";  // Asumiendo que este es el componente que usas para botones
 import { run } from "../db/db";
 import { todayISO } from "../utils/dates";
 import { formatCOP, parseCOP } from "../utils/money";
 import { listAccounts, goalBalance, goalContributions, addGoalContribution } from "../db/queries";
+import { Picker } from "@react-native-picker/picker"; // Importar Picker
 
 export default function GoalDetailScreen({ route, navigation }) {
   const { goalId } = route.params;
@@ -45,30 +47,108 @@ export default function GoalDetailScreen({ route, navigation }) {
   const pct = goal.target_amount ? saved / goal.target_amount : 0;
 
   return (
-    <ScrollView style={{ flex: 1 }}>
-      <View style={{ padding: 16, gap: 6 }}>
-        <Text style={{ fontSize: 20, fontWeight: "900" }}>{goal.name}</Text>
-        <Text>Meta: {formatCOP(goal.target_amount)}</Text>
-        <Text style={{ fontWeight: "900" }}>Ahorrado: {formatCOP(saved)} ({Math.round(pct * 100)}%)</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: "#070708" }}>
+      <View style={{ padding: 18, gap: 6 }}>
+        <Text style={{ fontSize: 22, fontWeight: "900", color: "#f2e3b6" }}>{goal.name}</Text>
+        <Text style={{ color: "#a59a7a" }}>Meta: {formatCOP(goal.target_amount)}</Text>
+        <Text style={{ fontWeight: "900", color: "#f2e3b6" }}>
+          Ahorrado: {formatCOP(saved)} ({Math.round(pct * 100)}%)
+        </Text>
       </View>
 
       <View style={{ padding: 16, gap: 8 }}>
-        <Text style={{ fontSize: 16, fontWeight: "800" }}>Mover ahorro</Text>
+        <Text style={{ fontSize: 16, fontWeight: "800", color: "#f2e3b6" }}>Mover ahorro</Text>
 
-        <Text>Modo (add/remove)</Text>
-        <TextInput value={mode} onChangeText={setMode} style={{ borderWidth: 1, padding: 10 }} />
+        {/* Modo (add/remove) con Picker */}
+        <Text style={{ color: "#a59a7a", marginBottom: 6 }}>Modo (add/remove)</Text>
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: "#3b2f16",
+            backgroundColor: "#0b0b0c",
+            borderRadius: 8,
+            marginBottom: 18,
+            overflow: "hidden",  // Asegura que el Picker no sobresalga de los bordes redondeados
+          }}
+        >
+          <Picker
+            selectedValue={mode}
+            onValueChange={(itemValue) => setMode(itemValue)}
+            style={{
+              height: 50,
+              color: "#f2e3b6",
+            }}
+          >
+            <Picker.Item label="Agregar" value="add" />
+            <Picker.Item label="Retirar" value="remove" />
+          </Picker>
+        </View>
 
-        <Text>Fecha (YYYY-MM-DD)</Text>
-        <TextInput value={date} onChangeText={setDate} style={{ borderWidth: 1, padding: 10 }} />
+        {/* Fecha (YYYY-MM-DD) */}
+        <Text style={{ color: "#a59a7a", marginBottom: 6 }}>Fecha (YYYY-MM-DD)</Text>
+        <TextInput
+          value={date}
+          onChangeText={setDate}
+          style={{
+            borderWidth: 1,
+            padding: 12,
+            borderColor: "#3b2f16",
+            backgroundColor: "#0b0b0c",
+            borderRadius: 8,
+            color: "#f2e3b6",
+            marginBottom: 18,
+          }}
+        />
 
-        <Text>Monto (COP)</Text>
-        <TextInput value={amount} onChangeText={setAmount} keyboardType="numeric" style={{ borderWidth: 1, padding: 10 }} />
+        {/* Monto (COP) */}
+        <Text style={{ color: "#a59a7a", marginBottom: 6 }}>Monto (COP)</Text>
+        <TextInput
+          value={amount}
+          onChangeText={setAmount}
+          keyboardType="numeric"
+          style={{
+            borderWidth: 1,
+            padding: 12,
+            borderColor: "#3b2f16",
+            backgroundColor: "#0b0b0c",
+            borderRadius: 8,
+            color: "#f2e3b6",
+            marginBottom: 18,
+          }}
+        />
 
-        <Text>Cuenta (ID, opcional)</Text>
-        <TextInput value={accountId} onChangeText={setAccountId} keyboardType="numeric" style={{ borderWidth: 1, padding: 10 }} />
-        <Text style={{ color: "#666" }}>Cuentas: {accounts.map((a) => `${a.id}:${a.name}`).join(" · ")}</Text>
+        {/* Cuenta (ID, opcional) con Picker */}
+        <Text style={{ color: "#a59a7a", marginBottom: 6 }}>Cuenta (ID, opcional)</Text>
+        <View
+          style={{
+            borderWidth: 1,
+            borderColor: "#3b2f16",
+            backgroundColor: "#0b0b0c",
+            borderRadius: 8,
+            marginBottom: 18,
+            overflow: "hidden",  // Asegura que el Picker no sobresalga de los bordes redondeados
+          }}
+        >
+          <Picker
+            selectedValue={accountId}
+            onValueChange={(itemValue) => setAccountId(itemValue)}
+            style={{
+              height: 50,
+              color: "#f2e3b6",
+            }}
+          >
+            {accounts.map((account) => (
+              <Picker.Item key={account.id} label={account.name} value={String(account.id)} />
+            ))}
+          </Picker>
+        </View>
 
-        <Button
+        <Text style={{ color: "#a59a7a", marginBottom: 12 }}>
+          Cuentas: {accounts.map((a) => `${a.id}:${a.name}`).join(" · ")}
+        </Text>
+
+        {/* Botón para agregar o retirar */}
+        <ERButton
           title={mode === "remove" ? "Retirar" : "Agregar"}
           onPress={async () => {
             const a = parseCOP(amount);
@@ -94,7 +174,9 @@ export default function GoalDetailScreen({ route, navigation }) {
         />
       </View>
 
-      <Text style={{ paddingHorizontal: 14, paddingTop: 6, fontSize: 16, fontWeight: "800" }}>Historial</Text>
+      <Text style={{ paddingHorizontal: 14, paddingTop: 6, fontSize: 16, fontWeight: "800", color: "#f2e3b6" }}>
+        Historial
+      </Text>
       {items.map((c) => (
         <Row
           key={c.id}

@@ -24,6 +24,7 @@ import GoalsScreen from "./src/screens/GoalsScreen";
 import RecurringScreen from "./src/screens/RecurringScreen";
 import SettingsScreen from "./src/screens/SettingsScreen";
 import GoalDetailScreen from "./src/screens/GoalDetailScreen";
+import TransactionDetailScreen from "./src/screens/TransactionDetailScreen";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -243,6 +244,7 @@ export default function App() {
 
         <Stack.Screen name="Goals" component={GoalsScreen} options={{ title: "Ahorros" }} />
         <Stack.Screen name="GoalDetail" component={GoalDetailScreen} options={{ title: "Ahorro" }} />
+        <Stack.Screen name="TransactionDetail" component={TransactionDetailScreen} options={{ title: "Detalle de Transaccion" }} />
 
         <Stack.Screen name="Recurring" component={RecurringScreen} options={{ title: "Suscripciones" }} />
       </Stack.Navigator>

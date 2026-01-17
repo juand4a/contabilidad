@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, TextInput, Alert, ScrollView, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
+import { Picker } from "@react-native-picker/picker"; // Importamos el Picker
 
 import Card from "../components/Card";
 import ERButton from "../components/ERButton";
@@ -135,16 +136,31 @@ export default function AddTransactionScreen({ route, navigation }) {
 
             <View>
               <Text style={labelStyle}>Tipo</Text>
-              <Text style={{ color: "#8f866c", marginTop: -2 }}>
-                expense / income / transfer / adjustment
-              </Text>
-              <TextInput
-                value={type}
-                onChangeText={setType}
-                placeholder="expense"
-                placeholderTextColor="#6f6754"
-                style={inputStyle}
-              />
+              <Text style={{ color: "#8f866c", marginTop: -2 }}>expense / income / transfer / adjustment</Text>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#3b2f16",
+                  backgroundColor: "#0b0b0c",
+                  borderRadius: 8,
+                  marginBottom: 18,
+                  overflow: "hidden",
+                }}
+              >
+                <Picker
+                  selectedValue={type}
+                  onValueChange={(itemValue) => setType(itemValue)}
+                  style={{
+                    height: 50,
+                    color: "#f2e3b6",
+                  }}
+                >
+                  <Picker.Item label="Gasto" value="expense" />
+                  <Picker.Item label="Ingreso" value="income" />
+                  <Picker.Item label="Transferencia" value="transfer" />
+                  <Picker.Item label="Ajuste" value="adjustment" />
+                </Picker>
+              </View>
             </View>
 
             <View>
@@ -165,15 +181,30 @@ export default function AddTransactionScreen({ route, navigation }) {
         <Card title="Cuenta" subtitle="Origen (y destino si es transferencia)" right={<Ionicons name="wallet" size={18} color="#caa85a" />}>
           <View style={{ gap: 10 }}>
             <View>
-              <Text style={labelStyle}>Cuenta (ID)</Text>
-              <TextInput
-                value={accountId}
-                onChangeText={setAccountId}
-                keyboardType="numeric"
-                placeholder="1"
-                placeholderTextColor="#6f6754"
-                style={inputStyle}
-              />
+              <Text style={labelStyle}>Cuenta (Origen)</Text>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#3b2f16",
+                  backgroundColor: "#0b0b0c",
+                  borderRadius: 8,
+                  marginBottom: 18,
+                  overflow: "hidden",
+                }}
+              >
+                <Picker
+                  selectedValue={accountId}
+                  onValueChange={(itemValue) => setAccountId(itemValue)}
+                  style={{
+                    height: 50,
+                    color: "#f2e3b6",
+                  }}
+                >
+                  {accounts.map((account) => (
+                    <Picker.Item key={account.id} label={account.name} value={String(account.id)} />
+                  ))}
+                </Picker>
+              </View>
               <Text style={hintStyle}>
                 Cuentas: {accounts.map((a) => `${a.id}:${a.name}`).join(" · ")}
               </Text>
@@ -181,21 +212,36 @@ export default function AddTransactionScreen({ route, navigation }) {
 
             {type === "transfer" ? (
               <View>
-                <Text style={labelStyle}>Cuenta destino (ID)</Text>
-                <TextInput
-                  value={toAccountId}
-                  onChangeText={setToAccountId}
-                  keyboardType="numeric"
-                  placeholder="2"
-                  placeholderTextColor="#6f6754"
-                  style={inputStyle}
-                />
+                <Text style={labelStyle}>Cuenta destino</Text>
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#3b2f16",
+                    backgroundColor: "#0b0b0c",
+                    borderRadius: 8,
+                    marginBottom: 18,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Picker
+                    selectedValue={toAccountId}
+                    onValueChange={(itemValue) => setToAccountId(itemValue)}
+                    style={{
+                      height: 50,
+                      color: "#f2e3b6",
+                    }}
+                  >
+                    {accounts.map((account) => (
+                      <Picker.Item key={account.id} label={account.name} value={String(account.id)} />
+                    ))}
+                  </Picker>
+                </View>
               </View>
             ) : null}
           </View>
         </Card>
 
-        {/* CATEGORÍAS + SPLIT (NO aplica a transfer) */}
+        {/* CATEGORÍAS + SPLIT */}
         {type !== "transfer" ? (
           <Card
             title="Clasificación"
@@ -205,99 +251,32 @@ export default function AddTransactionScreen({ route, navigation }) {
             <View style={{ gap: 10 }}>
               <View>
                 <Text style={labelStyle}>Categoría (ID)</Text>
-                <TextInput
-                  value={categoryId}
-                  onChangeText={setCategoryId}
-                  keyboardType="numeric"
-                  placeholder="3"
-                  placeholderTextColor="#6f6754"
-                  style={inputStyle}
-                />
+                <View
+                  style={{
+                    borderWidth: 1,
+                    borderColor: "#3b2f16",
+                    backgroundColor: "#0b0b0c",
+                    borderRadius: 8,
+                    marginBottom: 18,
+                    overflow: "hidden",
+                  }}
+                >
+                  <Picker
+                    selectedValue={categoryId}
+                    onValueChange={(itemValue) => setCategoryId(itemValue)}
+                    style={{
+                      height: 50,
+                      color: "#f2e3b6",
+                    }}
+                  >
+                    {categories.map((category) => (
+                      <Picker.Item key={category.id} label={category.name} value={String(category.id)} />
+                    ))}
+                  </Picker>
+                </View>
                 <Text style={hintStyle}>
                   Categorías: {categories.map((c) => `${c.id}:${c.name}`).join(" · ")}
                 </Text>
-              </View>
-
-              <TouchableOpacity
-                onPress={() => setUseSplit(!useSplit)}
-                activeOpacity={0.85}
-                style={{
-                  paddingVertical: 10,
-                  paddingHorizontal: 12,
-                  borderRadius: 12,
-                  borderWidth: 1,
-                  borderColor: useSplit ? "#caa85a" : "#3b2f16",
-                  backgroundColor: "#0b0b0c",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
-                <Ionicons name={useSplit ? "checkbox" : "square-outline"} size={18} color="#caa85a" />
-                <Text style={{ color: "#f2e3b6", fontWeight: "900", letterSpacing: 1 }}>
-                  {useSplit ? "SPLIT ACTIVADO" : "ACTIVAR SPLIT (DIVIDIR)"}
-                </Text>
-              </TouchableOpacity>
-
-              {useSplit ? (
-                <View style={{ gap: 10 }}>
-                  <Text style={{ color: "#8f866c" }}>
-                    Split ignora la categoría principal y reparte el monto.
-                  </Text>
-
-                  <View>
-                    <Text style={labelStyle}>Split 1 (catId)</Text>
-                    <TextInput
-                      value={split1Cat}
-                      onChangeText={setSplit1Cat}
-                      keyboardType="numeric"
-                      placeholder="catId"
-                      placeholderTextColor="#6f6754"
-                      style={inputStyle}
-                    />
-                    <Text style={[labelStyle, { marginTop: 10 }]}>Split 1 (monto)</Text>
-                    <TextInput
-                      value={split1Amt}
-                      onChangeText={setSplit1Amt}
-                      keyboardType="numeric"
-                      placeholder="monto"
-                      placeholderTextColor="#6f6754"
-                      style={inputStyle}
-                    />
-                  </View>
-
-                  <View>
-                    <Text style={labelStyle}>Split 2 (opcional catId)</Text>
-                    <TextInput
-                      value={split2Cat}
-                      onChangeText={setSplit2Cat}
-                      keyboardType="numeric"
-                      placeholder="catId"
-                      placeholderTextColor="#6f6754"
-                      style={inputStyle}
-                    />
-                    <Text style={[labelStyle, { marginTop: 10 }]}>Split 2 (opcional monto)</Text>
-                    <TextInput
-                      value={split2Amt}
-                      onChangeText={setSplit2Amt}
-                      keyboardType="numeric"
-                      placeholder="monto"
-                      placeholderTextColor="#6f6754"
-                      style={inputStyle}
-                    />
-                  </View>
-                </View>
-              ) : null}
-
-              <View>
-                <Text style={labelStyle}>Etiquetas (separadas por coma)</Text>
-                <TextInput
-                  value={tags}
-                  onChangeText={setTags}
-                  placeholder="mercado, almuerzo"
-                  placeholderTextColor="#6f6754"
-                  style={inputStyle}
-                />
               </View>
             </View>
           </Card>

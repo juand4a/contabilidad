@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, TextInput, Alert } from "react-native";
+import { View, Text, ScrollView, Alert ,TextInput} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { Picker } from "@react-native-picker/picker"; // Importamos Picker
 
 import { todayISO, monthKey } from "../utils/dates";
 import { listCategories, listBudgets, upsertBudget, expensesByCategory } from "../db/queries";
@@ -82,7 +83,7 @@ export default function BudgetsScreen() {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: "#070708" }}>
-      <View style={{ padding: 16, paddingTop: 18 }}>
+      <View style={{ padding: 16, paddingTop: 18,marginTop:30 }}>
         <Text style={{ color: "#a59a7a", letterSpacing: 2, fontWeight: "700" }}>VOWS OF SPENDING</Text>
         <Text style={{ color: "#f2e3b6", fontSize: 22, fontWeight: "900", marginTop: 10 }}>
           Presupuesto
@@ -99,15 +100,30 @@ export default function BudgetsScreen() {
         >
           <View style={{ gap: 10 }}>
             <View>
-              <Text style={labelStyle}>Categoría (ID)</Text>
-              <TextInput
-                value={catId}
-                onChangeText={setCatId}
-                keyboardType="numeric"
-                placeholder="3"
-                placeholderTextColor="#6f6754"
-                style={inputStyle}
-              />
+              <Text style={labelStyle}>Categoría</Text>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#3b2f16",
+                  backgroundColor: "#0b0b0c",
+                  borderRadius: 8,
+                  marginBottom: 18,
+                  overflow: "hidden",
+                }}
+              >
+                <Picker
+                  selectedValue={catId}
+                  onValueChange={(itemValue) => setCatId(itemValue)}
+                  style={{
+                    height: 50,
+                    color: "#f2e3b6",
+                  }}
+                >
+                  {cats.map((category) => (
+                    <Picker.Item key={category.id} label={category.name} value={String(category.id)} />
+                  ))}
+                </Picker>
+              </View>
               <Text style={hintStyle}>Categorías: {cats.map((c) => `${c.id}:${c.name}`).join(" · ")}</Text>
             </View>
 
@@ -126,16 +142,30 @@ export default function BudgetsScreen() {
             <View>
               <Text style={labelStyle}>Rollover (0/1)</Text>
               <Text style={{ color: "#8f866c", marginTop: -2 }}>
-                1 = lo no gastado pasa al siguiente mes (lógica futura)
+                Si activas la opción, lo no gastado se transferirá al siguiente mes.
               </Text>
-              <TextInput
-                value={rollover}
-                onChangeText={setRollover}
-                keyboardType="numeric"
-                placeholder="0"
-                placeholderTextColor="#6f6754"
-                style={inputStyle}
-              />
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#3b2f16",
+                  backgroundColor: "#0b0b0c",
+                  borderRadius: 8,
+                  marginBottom: 18,
+                  overflow: "hidden",
+                }}
+              >
+                <Picker
+                  selectedValue={rollover}
+                  onValueChange={(itemValue) => setRollover(itemValue)}
+                  style={{
+                    height: 50,
+                    color: "#f2e3b6",
+                  }}
+                >
+                  <Picker.Item label="No transferir al siguiente mes" value="0" />
+                  <Picker.Item label="Transferir al siguiente mes" value="1" />
+                </Picker>
+              </View>
             </View>
 
             <ERButton
