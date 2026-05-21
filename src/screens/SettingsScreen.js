@@ -117,6 +117,8 @@ export default function SettingsScreen() {
     tags: 0,
     transactions: 0,
     loans: 0,
+    loan_installments: 0,
+    recurring: 0,
   });
 
   const inputStyle = {
@@ -149,6 +151,8 @@ export default function SettingsScreen() {
       tags: await q("tags"),
       transactions: await q("transactions"),
       loans: await q("loans"),
+      loan_installments: await q("loan_installments"),
+      recurring: await q("recurring"),
     });
   }
 
@@ -251,6 +255,10 @@ export default function SettingsScreen() {
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Pill icon="layers" label="Categorías" value={counts.categories} />
           <Pill icon="pricetags" label="Etiquetas" value={counts.tags} />
+        </View>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          <Pill icon="calendar" label="Cuotas" value={counts.loan_installments} />
+          <Pill icon="notifications" label="Membresías" value={counts.recurring} />
         </View>
 
         <Card

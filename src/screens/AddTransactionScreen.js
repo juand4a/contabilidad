@@ -9,7 +9,7 @@ import ERButton from "../components/ERButton";
 
 import { todayISO } from "../utils/dates";
 import { parseCOP } from "../utils/money";
-import { listAccounts, listCategories, addTransaction, addTransfer } from "../db/queries";
+import { listAccounts, listCategories, addTransaction, addTransfer, ensureDefaultCashAccount } from "../db/queries";
 
 export default function AddTransactionScreen({ route, navigation }) {
   const presetAccountId = route.params?.accountId || null;
@@ -42,6 +42,7 @@ export default function AddTransactionScreen({ route, navigation }) {
 
   useEffect(() => {
     (async () => {
+      await ensureDefaultCashAccount();
       const acc = await listAccounts();
       setAccounts(acc);
 
@@ -201,7 +202,7 @@ export default function AddTransactionScreen({ route, navigation }) {
                   }}
                 >
                   {accounts.map((account) => (
-                    <Picker.Item key={account.id} label={account.name} value={String(account.id)} />
+                    <Picker.Item key={account.id} label={`${account.name} · ${account.type}`} value={String(account.id)} />
                   ))}
                 </Picker>
               </View>
@@ -232,7 +233,7 @@ export default function AddTransactionScreen({ route, navigation }) {
                     }}
                   >
                     {accounts.map((account) => (
-                      <Picker.Item key={account.id} label={account.name} value={String(account.id)} />
+                      <Picker.Item key={account.id} label={`${account.name} · ${account.type}`} value={String(account.id)} />
                     ))}
                   </Picker>
                 </View>

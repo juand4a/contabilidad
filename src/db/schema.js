@@ -1,5 +1,23 @@
 import { run } from "./db";
 
+async function addColumnIfMissing(table, column, definition) {
+  const info = await run(`PRAGMA table_info(${table})`);
+  const exists = (info.rows._array || []).some((c) => c.name === column);
+  if (!exists) {
+    await run(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
+async function ensureDefaultCashAccount() {
+  const r = await run(`SELECT COUNT(*) as c FROM accounts WHERE type='cash'`);
+  if ((r.rows.item(0)?.c ?? 0) === 0) {
+    await run(
+      `INSERT INTO accounts(name, type, currency, created_at) VALUES ('Efectivo', 'cash', 'COP', ?)`,
+      [new Date().toISOString()]
+    );
+  }
+}
+
 export async function initDb() {
   await run(`PRAGMA foreign_keys = ON;`);
 
@@ -78,7 +96,34 @@ export async function initDb() {
       interest_rate REAL NOT NULL DEFAULT 0,
       note TEXT,
       start_date TEXT NOT NULL,
-      status TEXT NOT NULL DEFAULT 'open' -- open|closed
+      status TEXT NOT NULL DEFAULT 'open', -- open|closed
+      due_date TEXT,
+      installment_count INTEGER NOT NULL DEFAULT 1,
+      installment_amount INTEGER NOT NULL DEFAULT 0,
+      reminder_days_before INTEGER NOT NULL DEFAULT 2
+    );
+  `);
+
+  // Migraciones para bases existentes.
+  await addColumnIfMissing("loans", "due_date", "TEXT");
+  await addColumnIfMissing("loans", "installment_count", "INTEGER NOT NULL DEFAULT 1");
+  await addColumnIfMissing("loans", "installment_amount", "INTEGER NOT NULL DEFAULT 0");
+  await addColumnIfMissing("loans", "reminder_days_before", "INTEGER NOT NULL DEFAULT 2");
+
+  await run(`
+    CREATE TABLE IF NOT EXISTS loan_installments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      loan_id INTEGER NOT NULL,
+      number INTEGER NOT NULL,
+      due_date TEXT NOT NULL,
+      amount INTEGER NOT NULL,
+      paid_amount INTEGER NOT NULL DEFAULT 0,
+      status TEXT NOT NULL DEFAULT 'pending', -- pending|paid
+      payment_id INTEGER,
+      notification_id TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(loan_id) REFERENCES loans(id) ON DELETE CASCADE,
+      FOREIGN KEY(payment_id) REFERENCES loan_payments(id) ON DELETE SET NULL
     );
   `);
 
@@ -95,6 +140,11 @@ export async function initDb() {
       FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE RESTRICT
     );
   `);
+
+  // Por si la tabla loan_installments fue creada antes de loan_payments en una versión anterior.
+  await addColumnIfMissing("loan_installments", "paid_amount", "INTEGER NOT NULL DEFAULT 0");
+  await addColumnIfMissing("loan_installments", "payment_id", "INTEGER");
+  await addColumnIfMissing("loan_installments", "notification_id", "TEXT");
 
   await run(`
     CREATE TABLE IF NOT EXISTS budgets (
@@ -130,10 +180,17 @@ export async function initDb() {
       next_date TEXT NOT NULL,
       active INTEGER NOT NULL DEFAULT 1,
       note TEXT,
+      reminder_days_before INTEGER NOT NULL DEFAULT 1,
+      notification_id TEXT,
+      last_notified_for TEXT,
       FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE CASCADE,
       FOREIGN KEY(category_id) REFERENCES categories(id) ON DELETE SET NULL
     );
   `);
+
+  await addColumnIfMissing("recurring", "reminder_days_before", "INTEGER NOT NULL DEFAULT 1");
+  await addColumnIfMissing("recurring", "notification_id", "TEXT");
+  await addColumnIfMissing("recurring", "last_notified_for", "TEXT");
 
   await run(`
     CREATE TABLE IF NOT EXISTS settings (
@@ -141,19 +198,24 @@ export async function initDb() {
       value TEXT
     );
   `);
+
   await run(`
-  CREATE TABLE IF NOT EXISTS goal_contributions (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    goal_id INTEGER NOT NULL,
-    date TEXT NOT NULL,
-    amount INTEGER NOT NULL, -- + aporta, - retira
-    account_id INTEGER,      -- opcional (si quieres ligar a una cuenta real)
-    note TEXT,
-    created_at TEXT NOT NULL,
-    FOREIGN KEY(goal_id) REFERENCES goals(id) ON DELETE CASCADE,
-    FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE SET NULL
-  );
-`);
+    CREATE TABLE IF NOT EXISTS goal_contributions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      goal_id INTEGER NOT NULL,
+      date TEXT NOT NULL,
+      amount INTEGER NOT NULL, -- + aporta, - retira
+      account_id INTEGER,      -- opcional (si quieres ligar a una cuenta real)
+      note TEXT,
+      created_at TEXT NOT NULL,
+      FOREIGN KEY(goal_id) REFERENCES goals(id) ON DELETE CASCADE,
+      FOREIGN KEY(account_id) REFERENCES accounts(id) ON DELETE SET NULL
+    );
+  `);
+
+  await run(`CREATE INDEX IF NOT EXISTS idx_recurring_next_date ON recurring(active, next_date);`);
+  await run(`CREATE INDEX IF NOT EXISTS idx_loan_installments_due ON loan_installments(status, due_date);`);
+  await run(`CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(account_id, date);`);
 
   // Seed básico de categorías (si no existen)
   const catCount = await run(`SELECT COUNT(*) as c FROM categories`);
@@ -165,8 +227,12 @@ export async function initDb() {
     await run(`INSERT INTO categories(name, parent_id, kind) VALUES ('Servicios', NULL, 'expense')`);
     await run(`INSERT INTO categories(name, parent_id, kind) VALUES ('Salud', NULL, 'expense')`);
     await run(`INSERT INTO categories(name, parent_id, kind) VALUES ('Ocio', NULL, 'expense')`);
+    await run(`INSERT INTO categories(name, parent_id, kind) VALUES ('Membresías', NULL, 'expense')`);
+    await run(`INSERT INTO categories(name, parent_id, kind) VALUES ('Cuotas / Deudas', NULL, 'expense')`);
     // Income
     await run(`INSERT INTO categories(name, parent_id, kind) VALUES ('Salario', NULL, 'income')`);
     await run(`INSERT INTO categories(name, parent_id, kind) VALUES ('Otros ingresos', NULL, 'income')`);
   }
+
+  await ensureDefaultCashAccount();
 }

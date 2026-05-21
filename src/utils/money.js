@@ -1,11 +1,26 @@
-export function formatCOP(value) {
+const currencyFormatter = new Intl.NumberFormat("es-CO", {
+  style: "currency",
+  currency: "COP",
+  maximumFractionDigits: 0,
+});
+
+export function formatCOP(value = 0) {
   const n = Number(value || 0);
-  return n.toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
+  return currencyFormatter.format(Number.isFinite(n) ? n : 0);
 }
 
 export function parseCOP(text) {
-  // "1.234.567" -> 1234567
-  if (!text) return 0;
+  if (text === null || text === undefined || text === "") return 0;
+
   const clean = String(text).replace(/[^\d-]/g, "");
-  return Number(clean || 0);
+  const n = Number(clean || 0);
+
+  return Number.isFinite(n) ? n : 0;
 }
+
+const moneyUtils = {
+  formatCOP,
+  parseCOP,
+};
+
+export default moneyUtils;

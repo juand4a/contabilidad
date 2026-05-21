@@ -6,13 +6,14 @@ import Row from "../components/Row";
 import Card from "../components/Card";
 import ERButton from "../components/ERButton";
 
-import { listAccounts, getAccountBalance } from "../db/queries";
+import { listAccounts, getAccountBalance, ensureDefaultCashAccount } from "../db/queries";
 import { formatCOP } from "../utils/money";
 
 export default function AccountsScreen({ navigation }) {
   const [items, setItems] = useState([]);
 
   async function load() {
+    await ensureDefaultCashAccount();
     const acc = await listAccounts();
     const enriched = [];
     for (const a of acc) {
@@ -52,7 +53,7 @@ export default function AccountsScreen({ navigation }) {
         <Text style={{ color: "#f2e3b6", fontSize: 26, fontWeight: "900", marginTop: 10 }}>
           {formatCOP(total)}
         </Text>
-        <Text style={{ color: "#8f866c", marginTop: 6 }}>Total en cuentas</Text>
+        <Text style={{ color: "#8f866c", marginTop: 6 }}>Total en cuentas y efectivo</Text>
 
         <View style={{ marginTop: 14 }}>
           <ERButton title="Crear cuenta" onPress={() => navigation.navigate("AddAccount")} />
@@ -63,11 +64,11 @@ export default function AccountsScreen({ navigation }) {
         {items.length === 0 ? (
           <Card
             title="Sin cuentas"
-            subtitle="Crea tu primera cuenta (banco/efectivo/billetera)"
+            subtitle="Crea tu primera cuenta (banco / efectivo / billetera)"
             right={<Ionicons name="sparkles" size={18} color="#caa85a" />}
           >
             <Text style={{ color: "#a59a7a" }}>
-              Consejo: crea una cuenta por cada lugar donde guardas dinero (banco, efectivo, billetera).
+              Consejo: la app crea una cuenta “Efectivo” por defecto; también puedes agregar bancos, billeteras e inversiones.
             </Text>
           </Card>
         ) : (

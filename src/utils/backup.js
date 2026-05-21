@@ -6,7 +6,22 @@ import * as Sharing from "expo-sharing";
 import { run } from "../db/db";
 
 export async function exportBackupJSON() {
-  const tables = ["accounts","categories","tags","transactions","transaction_splits","transaction_tags","loans","loan_payments","budgets","goals","recurring","settings"];
+  const tables = [
+    "accounts",
+    "categories",
+    "tags",
+    "transactions",
+    "transaction_splits",
+    "transaction_tags",
+    "loans",
+    "loan_installments",
+    "loan_payments",
+    "budgets",
+    "goals",
+    "goal_contributions",
+    "recurring",
+    "settings",
+  ];
   const data = {};
   for (const t of tables) {
     const r = await run(`SELECT * FROM ${t}`);
@@ -29,7 +44,22 @@ export async function restoreBackupFromUri(uri) {
 
   // limpia e inserta (orden importa por FKs)
   await run(`PRAGMA foreign_keys = OFF;`);
-  const del = ["transaction_tags","transaction_splits","loan_payments","transactions","loans","budgets","goals","recurring","tags","categories","accounts","settings"];
+  const del = [
+    "transaction_tags",
+    "transaction_splits",
+    "loan_payments",
+    "loan_installments",
+    "transactions",
+    "loans",
+    "budgets",
+    "goal_contributions",
+    "goals",
+    "recurring",
+    "tags",
+    "categories",
+    "accounts",
+    "settings",
+  ];
   for (const t of del) await run(`DELETE FROM ${t}`);
 
   const ins = async (t, rows) => {
@@ -51,9 +81,11 @@ export async function restoreBackupFromUri(uri) {
   await ins("transaction_splits", data.transaction_splits);
   await ins("transaction_tags", data.transaction_tags);
   await ins("loans", data.loans);
+  await ins("loan_installments", data.loan_installments);
   await ins("loan_payments", data.loan_payments);
   await ins("budgets", data.budgets);
   await ins("goals", data.goals);
+  await ins("goal_contributions", data.goal_contributions);
   await ins("recurring", data.recurring);
   await ins("settings", data.settings);
 
